@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+skinparam activity {
+  BackgroundColor #E2E8F0
+  BorderColor #334155
+  DiamondBackgroundColor #FEF3C7
+  DiamondBorderColor #B45309
+}
+
+title Formal-first admission of implementation semantics
+
+start
+:Define terms, endpoints, effects,\nprecision, and observable behavior; <<#DBEAFE>>
+:Prove universal laws in Rocq; <<#DDD6FE>>
+:Explore complete finite lifecycle with TLC; <<#A7F3D0>>
+:Prove critical transition kernels with TLAPS; <<#C4B5FD>>
+:Check independent violations and\ncountermodels with Z3; <<#FDE68A>>
+if (Every obligation passes?) then (yes)
+  :Admit a separately tracked\nimplementation-refinement task; <<#86EFAC>>
+  stop
+else (no)
+  :Revise or reject the semantic contract; <<#FECACA>>
+  :Repeat all affected proof layers; <<#EDE9FE>>
+  stop
+endif
+@enduml

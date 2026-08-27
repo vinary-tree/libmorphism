@@ -1,0 +1,39 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+
+title Vinary categorical optimization ownership
+
+component "lling-llang\npipeline policy and orchestration" as optimizer #BFDBFE
+component "libmorphism\ncomposition laws and witnesses" as morphism #EDE9FE
+component "PraTTaIL\nGrammarCore and parser generation" as parser #FDE68A
+component "Replete\ne-graphs and extraction" as replete #FBCFE8
+component "Rigail\nsemirings and weighted solvers" as rigail #FED7AA
+component "llattice\nlattice domains" as lattice #BBF7D0
+component "liblevenshtein + libdictenstein\nindexed domain feeds" as feeds #A7F3D0
+component "libvgraph\nstructural graph kernel" as graph #BAE6FD
+component "libcpg\nCPG semantics and analyses" as cpg #C7D2FE
+
+optimizer -[#2563EB,bold]-> parser : consumes generated frontend
+optimizer -[#DB2777,bold]-> replete : drives saturation
+optimizer -[#C2410C,bold]-> rigail : requests weighted solutions
+optimizer -[#16A34A,bold]-> lattice : evaluates ordered facts
+optimizer -[#0284C7,bold]-> graph : plans dependency waves
+optimizer -[#4F46E5,bold]-> cpg : requests CPG evidence
+feeds -[#16A34A]-> lattice : populate indexed fibers
+cpg -[#0284C7]-> graph : delegates generic structure
+
+morphism ..[#7C3AED]-> optimizer : validates composition plans
+morphism ..[#7C3AED]-> replete : types candidate boundaries
+morphism ..[#7C3AED]-> rigail : proves lawful maps
+morphism ..[#7C3AED]-> lattice : shares law vocabulary
+
+note bottom of morphism #F5F3FF
+  Contract dependency only.
+  No universal runtime object model.
+end note
+@enduml

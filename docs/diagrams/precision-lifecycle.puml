@@ -1,0 +1,44 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+skinparam state {
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+title Candidate precision and publication lifecycle
+
+[*] --> Draft
+state Draft #DBEAFE
+state Validated #DCFCE7
+state Composed #EDE9FE
+state Published #A7F3D0
+state Rejected #FECACA
+state Cancelled #E2E8F0
+
+Draft --> Validated : validation succeeds / witness := valid
+Draft --> Rejected : validation fails
+Draft --> Cancelled : cancel
+Validated --> Composed : compose / exact := leftExact and rightExact
+Validated --> Cancelled : cancel
+Composed --> Published : witness valid / publish
+Composed --> Cancelled : cancel
+Published --> [*]
+Rejected --> [*]
+Cancelled --> [*]
+
+note right of Composed #FEF3C7
+  Exactness may be preserved
+  only when both inputs are exact.
+  Completeness follows a separate,
+  equally monotone declaration.
+end note
+
+note right of Published #DCFCE7
+  Publication is impossible
+  without a validated witness.
+end note
+@enduml

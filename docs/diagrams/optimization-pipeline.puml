@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+skinparam activity {
+  BackgroundColor #E2E8F0
+  BorderColor #334155
+  DiamondBackgroundColor #FEF3C7
+  DiamondBorderColor #B45309
+}
+
+title Witnessed Vinary optimization pipeline
+
+start
+:Parse Perl-compatible frontend syntax\nwith PraTTaIL GrammarCore; <<#FDE68A>>
+:Normalize to typed optimizer objects; <<#DBEAFE>>
+:Attach liblevenshtein and libdictenstein\nindexed feeds with precision metadata; <<#A7F3D0>>
+:Solve weighted constraints with Rigail; <<#FED7AA>>
+:Build dependency graph and deterministic\nparallel waves with libvgraph; <<#BAE6FD>>
+:Explore equivalences with Replete\nunder explicit resource budgets; <<#FBCFE8>>
+:Extract stable candidate and provenance; <<#EDE9FE>>
+:Run independent validation; <<#DCFCE7>>
+if (Witness constructed?) then (yes)
+  :Publish exact or declared-approximate result; <<#86EFAC>>
+  stop
+else (no)
+  :Reject candidate with structured evidence; <<#FECACA>>
+  stop
+endif
+@enduml

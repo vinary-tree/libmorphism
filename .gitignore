@@ -1,0 +1,9 @@
+/target/
+/.tlacache/
+/formal/rocq/*.aux
+/formal/rocq/*.glob
+/formal/rocq/*.vo
+/formal/rocq/*.vok
+/formal/rocq/*.vos
+/formal/tla/states/
+/formal/tla/.tlacache/

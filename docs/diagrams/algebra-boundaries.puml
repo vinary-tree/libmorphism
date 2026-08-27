@@ -1,0 +1,36 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BorderColor #334155
+  FontColor #0F172A
+}
+
+title Lawful algebra boundaries
+
+rectangle "Monoid\n<latex>(M,\cdot,e)</latex>\nassociative + identity" as monoid #DBEAFE
+rectangle "Join semilattice\n<latex>(L,\vee)</latex>\nassociative + commutative + idempotent" as join #DCFCE7
+rectangle "Meet semilattice\n<latex>(L,\wedge)</latex>\nassociative + commutative + idempotent" as meet #FEF3C7
+rectangle "Lattice\njoin + meet + absorption" as lattice #EDE9FE
+rectangle "Semiring\n<latex>(S,\oplus,\cdot,0,1)</latex>\nchoice + extension + distributivity" as semiring #FCE7F3
+rectangle "Idempotent semiring\n<latex>a\oplus a=a</latex>" as idempotent #FBCFE8
+rectangle "Natural-order join\n<latex>a\preceq b \Leftrightarrow a\oplus b=b</latex>" as natural #CCFBF1
+
+join -[#16A34A,bold]-> lattice : contributes
+meet -[#D97706,bold]-> lattice : contributes
+semiring -[#DB2777,bold]-> idempotent : only with added law
+idempotent -[#0F766E,bold]-> natural : induces
+semiring ..[#64748B]-> monoid : multiplicative reduct
+monoid ..[#DC2626]-> join : not automatic
+semiring ..[#DC2626]-> lattice : multiplication is not meet
+
+legend right
+  |= Edge |= Meaning |
+  |<#16A34A> solid | lawfully contributes or induces |
+  |<#64748B> dotted gray | forgets structure |
+  |<#DC2626> dotted red | rejected automatic identification |
+endlegend
+@enduml
