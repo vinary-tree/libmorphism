@@ -1,0 +1,13 @@
+# id	formal_source	formal_claim	rust_symbol	rust_test
+signature-equality	formal/rocq/RustRefinement.v	signature_eqb_eq	src/signature.rs::Signature	tests/refinement.rs::signature_equality_matches_the_formal_decider
+effect-associativity	formal/rocq/Composition.v	effects_union_assoc	src/effect.rs::EffectSet::union	tests/laws.rs::effect_union_is_a_monoid
+exact-inputs	formal/rocq/RustRefinement.v	composition_summary_exact_inputs	src/claim.rs::Precision::compose	tests/refinement.rs::precision_composition_matches_conjunction
+complete-inputs	formal/rocq/RustRefinement.v	composition_summary_complete_inputs	src/claim.rs::Completeness::compose	tests/refinement.rs::completeness_composition_matches_conjunction
+endpoint-mismatch	formal/rocq/RustRefinement.v	composition_check_rejects_mismatched_endpoints	src/composition.rs::check_composition	tests/refinement.rs::composition_rejects_every_mismatched_middle_endpoint
+outer-endpoints	formal/rocq/RustRefinement.v	composition_check_reports_endpoints	src/composition.rs::CompositionSummary	tests/refinement.rs::composition_preserves_outer_endpoints
+provenance-order	formal/rocq/RustRefinement.v	composition_summary_provenance_order	src/composition.rs::CompositionProvenance	tests/refinement.rs::composition_provenance_is_before_then_after
+witness-soundness	formal/rocq/RustRefinement.v	validate_composition_is_sound	src/composition.rs::CompositionWitness	tests/refinement.rs::composition_witnesses_are_constructed_exactly_on_success
+exact-evidence	formal/rocq/RustRefinement.v	validated_exact_has_verified_bound_evidence	src/validation.rs::ValidatedMorphism	tests/refinement.rs::exact_candidates_require_accepted_bound_evidence
+validation-completeness	formal/rocq/Composition.v	validate_is_complete	src/validation.rs::validate_morphism	tests/refinement.rs::non_exact_candidates_validate_without_exactness_evidence
+typed-endpoints	formal/rocq/RustRefinement.v	typed_witness_has_declared_endpoints	src/typed.rs::TypedMorphism	tests/refinement.rs::typed_wrapper_requires_marker_endpoint_ids
+composition-associativity	formal/rocq/Composition.v	compose_associative	src/composition.rs::check_composition	tests/laws.rs::composition_observables_are_associative

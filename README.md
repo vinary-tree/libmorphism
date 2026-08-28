@@ -1,15 +1,16 @@
 # libmorphism
 
-libmorphism is the formal, implementation-independent contract layer for composable Vinary
-transformations. It defines what typed composition, identities, declared effects, precision,
-completeness, lawful algebraic structure, indexed families, and validated witnesses must mean
-before a production Rust interface is admitted.
+libmorphism is the formally grounded, `no_std` semantic-law crate for composable Vinary
+transformations. It provides compact endpoint identities, effect and result claims, immutable
+descriptors, verifier-bound law evidence, dynamic composition checks, and private validation
+witnesses. A zero-storage `Domain` marker layer makes already validated endpoints statically
+composable.
 
-The repository is intentionally formal-only at this milestone. Category theory is used as a
-design language and a source of laws, not as a runtime object hierarchy. The future Rust surface
-must refine these proofs with static endpoint types, concrete algebra traits, and zero-cost
-witnesses. It must not add dynamic dispatch, allocate categorical wrappers in hot loops, or imply
-that every indexed feed is a fibration.
+Category theory is used as a design language and a source of machine-checked laws, not as a
+runtime object hierarchy. The Rust core is dependency-free and allocation-free: it uses fixed-size
+identifiers, compact enums and bit sets, monomorphized verifiers, and private-field witnesses. It
+does not add dynamic dispatch, allocate categorical wrappers in hot loops, or imply that every
+indexed feed is a fibration.
 
 ## Start here
 
@@ -19,12 +20,15 @@ that every indexed feed is a fibration.
 - [Performance and concurrency](docs/engineering/performance-and-concurrency.md)
 - [Trust and resource safety](docs/security/trust-and-resource-safety.md)
 - [Formal verification workflow](docs/usage/formal-workflow.md)
+- [Rust API workflow](docs/usage/rust-api.md)
+- [Rust refinement argument](docs/science/rust-refinement.md)
 - [Formal source guide](formal/README.md)
 - [Diagram catalog](docs/diagrams/README.md)
 
-Run `scripts/verify-formal.sh all` before adding or changing implementation-facing semantics.
-The runner places every heavy proof command in a 4 GiB, no-swap systemd scope. Run
-`scripts/verify-docs.sh` after every documentation change.
+Run `scripts/verify-formal.sh all` before changing implementation-facing semantics, then run
+`scripts/verify-rust.sh` and `scripts/verify-docs.sh`. Every wrapper uses a 4 GiB, no-swap systemd
+scope and keeps its build, proof, log, and temporary state under the ignored repository `target/`
+tree on persistent storage.
 
 ## Campaign role
 
@@ -34,8 +38,8 @@ Those responsibilities remain with `llattice`, Rigail, Replete, PraTTaIL, libvgr
 lling-llang respectively. This boundary lets each library optimize its concrete representation
 without importing a universal runtime abstraction.
 
-The formal milestone is tracked by pgmcp task `vco-e1-formal-contracts` under epic
-`vinary-categorical-optimization-campaign`.
+The formal baseline is tracked by pgmcp task `vco-e1-formal-contracts`; the production crate is
+tracked by `vco-e1-libmorphism`, both under epic `vinary-categorical-optimization-campaign`.
 
 ## License
 

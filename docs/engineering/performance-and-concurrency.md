@@ -7,10 +7,13 @@ important: lawful composition exposes safe regrouping, typed endpoints prevent w
 plans, identities eliminate optional-stage branching, homomorphisms permit computation in a more
 efficient representation, and explicit effects reveal parallel work.
 
-The production rule is **prove abstractly, execute concretely**. Phantom endpoint markers,
-monomorphized adapters, compact enums, and validated witnesses can erase to ordinary Rust data.
-Heap-allocated categorical objects, dynamic dispatch in inner loops, and generalized higher-kinded
-encodings are out of scope unless measurements establish a net benefit.
+The production rule is **prove abstractly, execute concretely**. libmorphism implements this with
+256-bit fixed identifiers, a one-byte effect set, one-byte claim enums, monomorphized verifier
+calls, private witnesses without heap-owned fields, and phantom endpoint markers with zero value
+storage. Compile-time layout tests cap the descriptor at 160 bytes, law evidence at 112 bytes, and
+binary composition summaries at 168 bytes. Heap-allocated categorical objects, dynamic dispatch
+in inner loops, and generalized higher-kinded encodings are out of scope unless measurements
+establish a net benefit.
 
 ## Planning versus execution
 

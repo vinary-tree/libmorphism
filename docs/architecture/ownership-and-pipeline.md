@@ -73,8 +73,10 @@ precision, and completeness declarations make the omission observable.
 
 ## Compatibility contracts
 
-A future object or transformation can take full advantage of the pipeline only if it provides the
-following information. These are semantic requirements, not final Rust trait names.
+An object or transformation can take full advantage of the pipeline only if it provides the
+following information. `Domain`, `Signature`, `MorphismDescriptor`, and the validation types are
+the implemented core vocabulary; resource and algebra adapters remain owned by their specialist
+crates.
 
 | Contract | Requirement | Optimization value |
 |---|---|---|
@@ -94,6 +96,10 @@ following information. These are semantic requirements, not final Rust trait nam
 Static generic composition should be the fast path. A dynamic planning layer may type-erase already
 validated nodes, but it must retain checked endpoint identifiers and must never make the dynamic
 representation the domain libraries' hot-loop API.
+
+libmorphism witnesses one binary edge at a time and records its ordered `(before, after)`
+provenance. It does not allocate an arbitrary plan trace. lling-llang owns the complete pipeline
+sequence, validates its edges, and commits flattened evidence in stable plan order.
 
 ## Lawful adapters instead of inheritance
 

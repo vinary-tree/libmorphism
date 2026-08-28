@@ -43,10 +43,11 @@ Associativity permits legal regrouping for batching, fusion, staging, or paralle
 It does not permit reordering. Reordering requires an independent commutation proof that includes
 observable effects.
 
-libmorphism records effects as declarations whose composition is set union. The current formal
-model tracks state reads, state writes, allocation, and evidence emission. A future implementation
-may refine these fields, but it must preserve identity and associativity and must reject scheduling
-claims that conflict with declared effects.
+libmorphism records effects in the one-byte `EffectSet`, whose composition is bit-set union. The
+formal model and Rust representation track state reads, state writes, allocation, and evidence
+emission. `EffectSet::from_bits` rejects unknown meanings rather than silently preserving them.
+The type preserves the empty identity, associativity, commutativity, and idempotence; a scheduler
+must still reject concurrency that conflicts with declared effects.
 
 ## Precision and completeness are independent
 

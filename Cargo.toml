@@ -1,0 +1,27 @@
+[package]
+name = "libmorphism"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Formally grounded semantic contracts for composable Vinary transformations"
+readme = "README.md"
+keywords = ["category-theory", "composition", "formal-methods", "no-std"]
+categories = ["algorithms", "no-std", "rust-patterns"]
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = []
+
+[lints.rust]
+missing_docs = "deny"
+rust_2018_idioms = { level = "deny", priority = -1 }
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"
+
+[package.metadata.docs.rs]
+all-features = true

@@ -2,14 +2,15 @@
 
 ## Claims under test
 
-The formal milestone evaluates six claim families:
+The formal development evaluates seven claim families:
 
 1. endpoint-checked composition is associative and has identities;
 2. declared effects compose associatively with an empty identity;
 3. exactness and completeness never promote through composition;
 4. validation witnesses are constructible exactly when their checks succeed;
 5. semiring homomorphisms preserve natural order, while order reflection requires injectivity; and
-6. indexed families are fibers but need not admit fibration lifts.
+6. indexed families are fibers but need not admit fibration lifts; and
+7. the Rust representation preserves endpoint, evidence, provenance, and witness boundaries.
 
 The evidence matrix separates universal proofs, finite-state exploration, and counterexamples.
 
@@ -21,6 +22,7 @@ The evidence matrix separates universal proofs, finite-state exploration, and co
 | Algebra preservation | Proof | — | — | Satisfiable noninjective countermodel |
 | Invalid algebra conflations | Constructive counterexamples | — | — | Satisfiable multiplication/meet countermodel |
 | Fiber versus fibration | Constructive counterexample | — | — | — |
+| Rust representation refinement | Proof plus correspondence tests | — | — | — |
 
 ## Formal-first sequence
 
@@ -50,7 +52,7 @@ behavior.
 
 The Rocq development is constructive and contains no axioms or admissions. `Print Assumptions`
 asks the kernel which assumptions each selected result depends on. The expected response is
-`Closed under the global context` twelve times.
+`Closed under the global context` eighteen times.
 
 The model uses a decidable endpoint comparison, so composition returns an option. This mirrors an
 implementation boundary where independently produced transformations may need runtime endpoint
@@ -95,6 +97,14 @@ improvement: it may mean the encoding accidentally asserted the conclusion.
 - The finite TLA+ model omits implementation data sizes, failures, and scheduling timing.
 - Z3 checks its own encoding, not the Rocq source.
 - Effects are currently conservative booleans; richer regions or capabilities need new laws.
-- No production implementation exists at this milestone, so no refinement claim is yet made.
+- Executable correspondence covers the selected finite encodings; verifier-specific proof formats
+  remain obligations of their verifier implementations.
 
 These limitations define the next evidence required rather than weakening the existing claims.
+
+## Rust correspondence
+
+The [Rust refinement argument](rust-refinement.md) defines the concrete representation and trust
+boundary. [`formal/refinement.tsv`](../../formal/refinement.tsv) maps each admitted observation to
+a theorem, Rust symbol, and independent test. A change to any mapped element must update all four
+artifacts in one reviewable change; a stale path or name fails verification.

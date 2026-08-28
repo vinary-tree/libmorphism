@@ -26,13 +26,15 @@ creation, and memory exhaustion.
 ## Witness construction
 
 The formal constructor uses a decidable validation predicate and returns a dependent pair only
-when the predicate succeeds. A Rust refinement should make witness fields private and expose a
-fallible validator. Deserialization must reconstruct the candidate and rerun validation; it must
-not deserialize an authority-bearing witness directly.
+when the predicate succeeds. The Rust refinement uses private `ValidatedMorphism` and
+`CompositionWitness` fields with fallible validators. Deserialization must reconstruct the
+candidate and rerun validation; it must not deserialize an authority-bearing witness directly.
 
-Witnesses should bind at least the candidate digest, source and target identities, policy version,
-rewrite-set digest, precision, completeness, and validation procedure version. If any bound field
-changes, the witness is stale.
+`LawEvidence` binds a descriptor identity, law kind, verifier identity, policy version, and proof
+artifact. A producer using content identities must make the `MorphismId` cover the source and
+target, effects, precision, completeness, provenance, rewrite-set digest, and validation procedure
+version relevant to its policy. If any bound field changes, the evidence is stale. libmorphism
+checks the binding but deliberately does not choose the producer's digest algorithm.
 
 ## Resource containment
 

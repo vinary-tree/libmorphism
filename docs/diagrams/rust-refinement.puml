@@ -1,0 +1,52 @@
+@startuml
+title libmorphism Rust refinement and authority flow
+skinparam backgroundColor #FAFCFF
+skinparam shadowing false
+skinparam defaultFontName DejaVu Sans
+skinparam ArrowColor #34495E
+skinparam activity {
+  BackgroundColor #E8F1FB
+  BorderColor #2C6E9B
+  DiamondBackgroundColor #FFF4CC
+  DiamondBorderColor #B8860B
+  StartColor #1B5E20
+  EndColor #7B1FA2
+  BarColor #34495E
+}
+
+start
+:MorphismCandidate\ndescriptor + claimed signature\n+ optional LawEvidence; <<#E8F1FB>>
+if (signature agrees?) then (yes)
+  if (precision is Exact?) then (yes)
+    if (evidence is bound and\nverifier accepts?) then (yes)
+      :private ValidatedMorphism\nvalidated descriptor + evidence; <<#DDF3E4>>
+    else (no)
+      :ValidationError\nmissing, mismatched, or rejected evidence; <<#FADBD8>>
+      stop
+    endif
+  else (no)
+    :private ValidatedMorphism\nconservative descriptor; <<#DDF3E4>>
+  endif
+else (no)
+  :ValidationError\nsignature mismatch; <<#FADBD8>>
+  stop
+endif
+
+if (marker IDs agree?) then (yes)
+  :TypedMorphism<Source, Target>\nzero-sized static endpoint markers; <<#E8DFF5>>
+else (no)
+  :TypedEndpointError\nsource or target marker mismatch; <<#FADBD8>>
+  stop
+endif
+
+partition "Validated composition" #F3F8FC {
+  :before: A -> B\nafter: B -> C;
+  if (middle endpoint agrees?) then (yes)
+    :private CompositionWitness\nA -> C; effect union;\nclaim conjunction; ordered provenance; <<#DDF3E4>>
+  else (no)
+    :EndpointMismatch\nbefore.target != after.source; <<#FADBD8>>
+    stop
+  endif
+}
+stop
+@enduml
