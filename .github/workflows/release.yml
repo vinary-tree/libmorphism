@@ -117,14 +117,15 @@ jobs:
         run: |
           set -euo pipefail
           version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
+          dist=target/release-dist
           cargo package --locked
-          mkdir -p dist
-          cp "target/package/libmorphism-${version}.crate" dist/
+          mkdir -p "$dist"
+          cp "target/package/libmorphism-${version}.crate" "$dist/"
           cargo package --locked
-          cmp "dist/libmorphism-${version}.crate" \
+          cmp "$dist/libmorphism-${version}.crate" \
             "target/package/libmorphism-${version}.crate"
-          cargo package --locked --list >dist/PACKAGE-CONTENTS.txt
-          pushd dist >/dev/null
+          cargo package --locked --list >"$dist/PACKAGE-CONTENTS.txt"
+          pushd "$dist" >/dev/null
           sha256sum "libmorphism-${version}.crate" \
             PACKAGE-CONTENTS.txt >SHA256SUMS
           sha256sum --check SHA256SUMS
@@ -133,7 +134,7 @@ jobs:
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: libmorphism-crate
-          path: dist
+          path: target/release-dist
           if-no-files-found: error
 
   github-release:
@@ -157,14 +158,14 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: libmorphism-crate
-          path: dist
+          path: target/release-dist
       - name: Verify and publish immutable assets
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          (cd dist && sha256sum --check SHA256SUMS)
+          (cd target/release-dist && sha256sum --check SHA256SUMS)
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             printf 'GitHub release %s already exists; ' "$GITHUB_REF_NAME" >&2
             printf '%s\n' 'refusing to overwrite it' >&2
@@ -173,7 +174,7 @@ jobs:
           version=${GITHUB_REF_NAME#v}
           prerelease=()
           if [[ "$version" == *-* ]]; then prerelease=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" dist/* \
+          gh release create "$GITHUB_REF_NAME" target/release-dist/* \
             --verify-tag \
             --title "libmorphism $version" \
             --generate-notes \
@@ -201,15 +202,15 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: libmorphism-crate
-          path: dist
+          path: target/release-dist
       - name: Reproduce the validated crate archive
         shell: bash
         run: |
           set -euo pipefail
-          (cd dist && sha256sum --check SHA256SUMS)
+          (cd target/release-dist && sha256sum --check SHA256SUMS)
           version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
           cargo package --locked
-          cmp "dist/libmorphism-${version}.crate" \
+          cmp "target/release-dist/libmorphism-${version}.crate" \
             "target/package/libmorphism-${version}.crate"
       - name: Reject an already-published version
         shell: bash
