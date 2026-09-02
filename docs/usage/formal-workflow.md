@@ -2,7 +2,8 @@
 
 ## Prerequisites
 
-The verification suite expects Rocq with `coqc`, the TLA+ `tla2sany` and `tlc` launchers, TLAPS
+The verification suite prefers Rocq's `rocq compile` driver and accepts the legacy `coqc`
+driver as a compatibility fallback. It also expects the TLA+ `tla2sany` and `tlc` launchers, TLAPS
 with `tlapm`, Z3, systemd user scopes, PlantUML, `jq`, and `vinary-doc-lint`. The scripts
 fail closed when a required executable is absent.
 

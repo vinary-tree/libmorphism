@@ -35,12 +35,20 @@ require_tool() {
 }
 
 verify_rocq() {
-  require_tool coqc
+  local -a compiler
+  if command -v rocq >/dev/null 2>&1; then
+    compiler=(rocq compile)
+  elif command -v coqc >/dev/null 2>&1; then
+    compiler=(coqc)
+  else
+    echo "required tool is unavailable: rocq or coqc" >&2
+    exit 1
+  fi
   local log="$evidence/rocq.log"
   (
     cd "$root/formal/rocq"
     for source in Composition.v Algebra.v IndexedFamilies.v Countermodels.v RustRefinement.v; do
-      coqc -Q . Libmorphism "$source"
+      "${compiler[@]}" -Q . Libmorphism "$source"
     done
   ) 2>&1 | tee "$log"
 
