@@ -3,7 +3,7 @@
 ## Prerequisites
 
 The verification suite expects Rocq with `coqc`, the TLA+ `tla2sany` and `tlc` launchers, TLAPS
-with `tlapm`, Z3, systemd user scopes, ripgrep, PlantUML, `jq`, and `vinary-doc-lint`. The scripts
+with `tlapm`, Z3, systemd user scopes, PlantUML, `jq`, and `vinary-doc-lint`. The scripts
 fail closed when a required executable is absent.
 
 ## Verify a change
@@ -35,8 +35,9 @@ For documentation:
 scripts/verify-docs.sh
 ```
 
-That command renders every PlantUML source headlessly and requires `vinary-doc-lint` to report no
-diagnostics and no pending changes.
+That command renders every PlantUML source headlessly twice, requires byte-identical manifests,
+and requires `vinary-doc-lint` to report no diagnostics and no pending changes. The linter runs in
+read-only mode: proposed repairs require manual semantic review and are never applied automatically.
 
 For the production Rust refinement:
 
@@ -45,8 +46,20 @@ scripts/verify-rust.sh
 ```
 
 That gate checks formatting, every Cargo target, the dependency-free `no_std` configuration,
-Clippy with warnings denied, exhaustive law and correspondence tests, rustdoc, the compiled
-example, and every row in `formal/refinement.tsv`.
+Clippy with warnings denied, exhaustive law and correspondence tests, randomized properties,
+rustdoc, the compiled example, the small-stack stress test, and every row in
+`formal/refinement.tsv`.
+
+Before an immutable release, run the superset gate:
+
+```text
+scripts/verify-release.sh
+```
+
+It adds the exact Rust 1.85 feature matrix, workflow linting, release-ref negative controls,
+deterministic documentation evidence, the complete formal suite, and locked package construction.
+The [release procedure](../engineering/releasing.md) defines tagging, publication, and public
+readback.
 
 ## Change protocol
 

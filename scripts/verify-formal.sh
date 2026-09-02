@@ -14,7 +14,7 @@ if [[ "${LIBMORPHISM_FORMAL_SCOPED:-0}" != "1" ]]; then
   exec systemd-run --user --scope \
     -p MemoryMax=4G \
     -p MemorySwapMax=0 \
-    -p CPUQuota=400% \
+    -p CPUQuota=100% \
     -p TasksMax=64 \
     --setenv=LIBMORPHISM_FORMAL_SCOPED=1 \
     --setenv=CARGO_BUILD_JOBS=1 \
@@ -45,13 +45,13 @@ verify_rocq() {
   ) 2>&1 | tee "$log"
 
   local closed_count
-  closed_count="$(rg -c '^Closed under the global context$' "$log")"
+  closed_count="$(grep -c '^Closed under the global context$' "$log")"
   if [[ "$closed_count" != "18" ]]; then
     echo "expected 18 axiom-free Rocq assumption reports; found $closed_count" >&2
     exit 1
   fi
 
-  if rg -n '\b(Axiom|Parameter|Admitted|admit)\b' "$root/formal/rocq"/*.v; then
+  if grep -nE '\b(Axiom|Parameter|Admitted|admit)\b' "$root/formal/rocq"/*.v; then
     echo "forbidden Rocq trust escape found" >&2
     exit 1
   fi
@@ -77,8 +77,8 @@ verify_tla() {
     return "$status"
   fi
 
-  rg -q '^Model checking completed\. No error has been found\.$' "$log"
-  rg -q '^26 states generated, 25 distinct states found, 0 states left on queue\.$' "$log"
+  grep -q '^Model checking completed\. No error has been found\.$' "$log"
+  grep -q '^26 states generated, 25 distinct states found, 0 states left on queue\.$' "$log"
 }
 
 verify_tlaps() {
@@ -98,7 +98,7 @@ verify_tlaps() {
     return "$status"
   fi
 
-  rg -q 'All 3 obligations proved\.' "$log"
+  grep -q 'All 3 obligations proved\.' "$log"
 }
 
 verify_z3() {
@@ -106,7 +106,7 @@ verify_z3() {
   local log="$evidence/z3.log"
   z3 -smt2 "$root/formal/smt/contracts.smt2" 2>&1 | tee "$log"
 
-  mapfile -t actual < <(rg '^(un)?sat$' "$log")
+  mapfile -t actual < <(grep -E '^(un)?sat$' "$log")
   local expected=(unsat unsat sat sat)
   if [[ "${actual[*]:-}" != "${expected[*]}" ]]; then
     echo "unexpected solver result sequence: ${actual[*]:-<none>}" >&2
@@ -118,7 +118,7 @@ verify_z3() {
     unconfirmed-exact-validation-is-impossible \
     semiring-times-can-differ-from-meet \
     noninjective-map-can-fail-order-reflection; do
-    rg -q "^CASE ${case_name}$" "$log"
+    grep -q "^CASE ${case_name}$" "$log"
   done
 }
 

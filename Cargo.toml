@@ -5,7 +5,10 @@ edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
 description = "Formally grounded semantic contracts for composable Vinary transformations"
+authors = ["Vinary Tree Contributors"]
 readme = "README.md"
+repository = "https://github.com/vinary-tree/libmorphism"
+homepage = "https://github.com/vinary-tree/libmorphism"
 keywords = ["category-theory", "composition", "formal-methods", "no-std"]
 categories = ["algorithms", "no-std", "rust-patterns"]
 
@@ -14,6 +17,9 @@ path = "src/lib.rs"
 
 [features]
 default = []
+
+[dev-dependencies]
+proptest = { version = "=1.4.0", default-features = false, features = ["std"] }
 
 [lints.rust]
 missing_docs = "deny"

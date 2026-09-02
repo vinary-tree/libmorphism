@@ -33,7 +33,7 @@ scripts/verify-formal.sh all
 ```
 
 Each invocation self-enters a headless systemd scope with `MemoryMax=4G`, `MemorySwapMax=0`,
-`CPUQuota=400%`, and `TasksMax=64`. Java-based TLA+ checks also receive a 1 GiB heap limit.
+`CPUQuota=100%`, and `TasksMax=64`. Java-based TLA+ checks also receive a 1 GiB heap limit.
 Evidence is captured under `target/verification/`.
 
 ## Trust statement

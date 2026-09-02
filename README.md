@@ -24,6 +24,7 @@ indexed feed is a fibration.
 - [Rust refinement argument](docs/science/rust-refinement.md)
 - [Formal source guide](formal/README.md)
 - [Diagram catalog](docs/diagrams/README.md)
+- [Release and provenance procedure](docs/engineering/releasing.md)
 
 Run `scripts/verify-formal.sh all` before changing implementation-facing semantics, then run
 `scripts/verify-rust.sh` and `scripts/verify-docs.sh`. Every wrapper uses a 4 GiB, no-swap systemd

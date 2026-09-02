@@ -11,7 +11,7 @@ if [[ "${LIBMORPHISM_DOCS_SCOPED:-0}" != "1" ]]; then
   exec systemd-run --user --scope \
     -p MemoryMax=4G \
     -p MemorySwapMax=0 \
-    -p CPUQuota=400% \
+    -p CPUQuota=100% \
     -p TasksMax=64 \
     --setenv=LIBMORPHISM_DOCS_SCOPED=1 \
     --setenv=TMPDIR="$temporary" \
@@ -30,4 +30,5 @@ DISPLAY="" plantuml -tsvg \
   "$root/docs/diagrams/optimization-pipeline.puml" \
   "$root/docs/diagrams/formal-first-sequence.puml" \
   "$root/docs/diagrams/rust-refinement.puml" \
+  "$root/docs/diagrams/release-provenance.puml" \
   2>&1 | tee "$evidence/plantuml.log"

@@ -1,0 +1,254 @@
+---
+name: Release
+
+'on':
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: >-
+          Validate immutable source or publish exactly one destination
+        required: true
+        default: validate-only
+        type: choice
+        options:
+          - validate-only
+          - github-release
+          - crates-io
+
+permissions:
+  contents: read
+
+concurrency:
+  group: libmorphism-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_BUILD_JOBS: '1'
+  CARGO_INCREMENTAL: '0'
+
+jobs:
+  contract:
+    name: Immutable release contract
+    runs-on: ubuntu-24.04
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # dtolnay/rust-toolchain 1.97.1 action
+      - uses: dtolnay/rust-toolchain@032958afbdc797a9164d3bc0b56325c1308924a5
+        with:
+          toolchain: 1.97.1
+      - name: Require the exact Cargo version tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check-release-ref.py \
+            --ref-type "$GITHUB_REF_TYPE" \
+            --ref-name "$GITHUB_REF_NAME" \
+            --ref-object-type "$(git cat-file -t "$GITHUB_REF")"
+      - name: Require a committed lockfile
+        run: |
+          cargo metadata --locked --no-deps --format-version 1 >/dev/null
+          git diff --exit-code -- Cargo.lock
+
+  verify:
+    name: Rust API and refinement
+    needs: contract
+    runs-on: ubuntu-24.04
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      # dtolnay/rust-toolchain 1.97.1 action
+      - uses: dtolnay/rust-toolchain@032958afbdc797a9164d3bc0b56325c1308924a5
+        with:
+          toolchain: 1.97.1
+          components: clippy, rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo check --locked --all-targets --all-features
+      - run: cargo check --locked --lib --no-default-features
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo test --locked --all-targets --all-features
+      - run: cargo test --locked --doc --all-features
+      - run: python3 scripts/check-refinement.py
+      - run: python3 scripts/check-release-ref.py --self-test
+
+  msrv:
+    name: Rust 1.85 feature matrix
+    needs: contract
+    runs-on: ubuntu-24.04
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      # dtolnay/rust-toolchain 1.85.0 action
+      - uses: dtolnay/rust-toolchain@bc540ba06a4ccee415bb241490e0b25ee8e7d315
+        with:
+          toolchain: 1.85.0
+      - run: cargo check --locked --lib --no-default-features
+      - run: cargo check --locked --lib
+
+  proofs:
+    name: Axiom-free Rocq refinement
+    needs: contract
+    runs-on: ubuntu-24.04
+    container:
+      # yamllint disable-line rule:line-length
+      image: rocq/rocq-prover:9.1.1@sha256:b85a80a11bb65c7c843f91c7cbcce282f22ee397c9ca42f123d568ab6cef68b0
+      options: --user root
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      - name: Compile every proof and reject trust escapes
+        run: >-
+          opam exec --root=/home/rocq/.opam --switch="$COMPILER" --
+          env LIBMORPHISM_FORMAL_SCOPED=1 scripts/verify-formal.sh rocq
+
+  package:
+    name: Reproducible crate candidate
+    needs: [verify, msrv, proofs]
+    runs-on: ubuntu-24.04
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      # dtolnay/rust-toolchain 1.97.1 action
+      - uses: dtolnay/rust-toolchain@032958afbdc797a9164d3bc0b56325c1308924a5
+        with:
+          toolchain: 1.97.1
+      - name: Build and inspect the crate archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
+          cargo package --locked
+          mkdir -p dist
+          cp "target/package/libmorphism-${version}.crate" dist/
+          cargo package --locked
+          cmp "dist/libmorphism-${version}.crate" \
+            "target/package/libmorphism-${version}.crate"
+          cargo package --locked --list >dist/PACKAGE-CONTENTS.txt
+          pushd dist >/dev/null
+          sha256sum "libmorphism-${version}.crate" \
+            PACKAGE-CONTENTS.txt >SHA256SUMS
+          sha256sum --check SHA256SUMS
+          popd >/dev/null
+      # actions/upload-artifact v7.0.1
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: libmorphism-crate
+          path: dist
+          if-no-files-found: error
+
+  github-release:
+    name: Publish checksummed GitHub release
+    needs: package
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref_type == 'tag' &&
+      inputs.registry == 'github-release'
+    runs-on: ubuntu-24.04
+    environment: github-release
+    permissions:
+      contents: write
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # actions/download-artifact v8.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: libmorphism-crate
+          path: dist
+      - name: Verify and publish immutable assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check SHA256SUMS)
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            printf 'GitHub release %s already exists; ' "$GITHUB_REF_NAME" >&2
+            printf '%s\n' 'refusing to overwrite it' >&2
+            exit 1
+          fi
+          version=${GITHUB_REF_NAME#v}
+          prerelease=()
+          if [[ "$version" == *-* ]]; then prerelease=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --verify-tag \
+            --title "libmorphism $version" \
+            --generate-notes \
+            "${prerelease[@]}"
+
+  crates-io:
+    name: Publish crates.io
+    needs: package
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref_type == 'tag' &&
+      inputs.registry == 'crates-io'
+    runs-on: ubuntu-24.04
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      # actions/checkout v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with: {persist-credentials: false}
+      # dtolnay/rust-toolchain 1.97.1 action
+      - uses: dtolnay/rust-toolchain@032958afbdc797a9164d3bc0b56325c1308924a5
+        with:
+          toolchain: 1.97.1
+      # actions/download-artifact v8.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: libmorphism-crate
+          path: dist
+      - name: Reproduce the validated crate archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum --check SHA256SUMS)
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
+          cargo package --locked
+          cmp "dist/libmorphism-${version}.crate" \
+            "target/package/libmorphism-${version}.crate"
+      - name: Reject an already-published version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n1)
+          status=$(curl --retry 4 --retry-all-errors --silent --show-error \
+            --user-agent \
+            'libmorphism-release/1.0' \
+            --output "$RUNNER_TEMP/crates-version.json" \
+            --write-out '%{http_code}' \
+            "https://crates.io/api/v1/crates/libmorphism/$version")
+          case "$status" in
+            404) ;;
+            200)
+              printf 'libmorphism %s is already public; ' "$version" >&2
+              printf '%s\n' 'refusing to republish' >&2
+              exit 1
+              ;;
+            *)
+              echo "crates.io version preflight returned HTTP $status" >&2
+              exit 1
+              ;;
+          esac
+      - name: Authenticate with crates.io
+        id: crates-io-auth
+        # rust-lang/crates-io-auth-action v1.0.5
+        # yamllint disable-line rule:line-length
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18
+      - name: Publish the exact tagged crate
+        run: cargo publish --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-io-auth.outputs.token }}

@@ -100,7 +100,8 @@ fn composition_observables_are_associative() {
                                             1,
                                             domain(1),
                                             domain(2),
-                                            EffectSet::from_bits(first_effects).unwrap(),
+                                            EffectSet::from_bits(first_effects)
+                                                .expect("enumerated first effects are valid"),
                                             first_precision,
                                             first_completeness,
                                         );
@@ -108,7 +109,8 @@ fn composition_observables_are_associative() {
                                             2,
                                             domain(2),
                                             domain(3),
-                                            EffectSet::from_bits(second_effects).unwrap(),
+                                            EffectSet::from_bits(second_effects)
+                                                .expect("enumerated second effects are valid"),
                                             second_precision,
                                             second_completeness,
                                         );
@@ -116,7 +118,8 @@ fn composition_observables_are_associative() {
                                             3,
                                             domain(3),
                                             domain(4),
-                                            EffectSet::from_bits(third_effects).unwrap(),
+                                            EffectSet::from_bits(third_effects)
+                                                .expect("enumerated third effects are valid"),
                                             third_precision,
                                             third_completeness,
                                         );

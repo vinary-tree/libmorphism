@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor #F8FAFC
+skinparam defaultFontName DejaVu Sans
+skinparam shadowing false
+skinparam ArrowColor #334155
+skinparam ArrowThickness 2
+skinparam sequence {
+  ActorBorderColor #1D4ED8
+  ActorBackgroundColor #DBEAFE
+  ParticipantBorderColor #475569
+  ParticipantBackgroundColor #E2E8F0
+  DatabaseBorderColor #047857
+  DatabaseBackgroundColor #D1FAE5
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F1F5F9
+}
+
+title Immutable libmorphism release and public readback
+
+actor Maintainer
+participant "Local release gate" as Gate
+participant "Exact Git tag" as Tag
+participant "GitHub Actions" as CI
+database "Checksummed crate" as Crate
+participant "GitHub Release" as GitHub
+participant "crates.io" as Registry
+
+Maintainer -> Gate: verify-release.sh
+activate Gate
+Gate -> Gate: Rust + minimum version + proofs + docs + package
+Gate --> Maintainer: complete evidence or fail closed
+deactivate Gate
+Maintainer -> Tag: create exact v{Cargo version} tag
+Maintainer -> CI: dispatch validate-only on exact tag
+activate CI
+CI -> CI: recheck exact tag, lockfile, Rust 1.85, Rocq
+CI -> Crate: package and checksum immutable source
+CI --> Maintainer: validated artifact identity
+deactivate CI
+
+alt Publish GitHub destination
+  Maintainer -> CI: dispatch github-release on same tag
+  CI -> GitHub: create only when release is absent
+  GitHub --> Maintainer: read back tag, assets, checksums
+else Publish registry destination
+  Maintainer -> CI: dispatch crates-io on same tag
+  CI -> Registry: publish only when version is absent
+  Registry --> Maintainer: read back version and checksum
+end
+
+note over Tag,Registry #FEF3C7
+The tag and public version are immutable.
+A correction requires a new Cargo version and tag.
+end note
+@enduml
