@@ -77,6 +77,9 @@ verify_tla() {
     tla2sany PrecisionLifecycle.tla
     tlc -workers 1 -metadir "$tlc_state" \
       -config PrecisionLifecycle.cfg PrecisionLifecycle.tla
+    tla2sany ReleaseProtocol.tla
+    tlc -workers 1 -metadir "$tlc_state" \
+      -config ReleaseProtocol.cfg ReleaseProtocol.tla
   ) 2>&1 | tee "$log"
   local status="${PIPESTATUS[0]}"
   set -e
@@ -85,8 +88,9 @@ verify_tla() {
     return "$status"
   fi
 
-  grep -q '^Model checking completed\. No error has been found\.$' "$log"
+  [[ "$(grep -c '^Model checking completed\. No error has been found\.$' "$log")" == "2" ]]
   grep -q '^26 states generated, 25 distinct states found, 0 states left on queue\.$' "$log"
+  grep -q '^21 states generated, 9 distinct states found, 0 states left on queue\.$' "$log"
 }
 
 verify_tlaps() {
@@ -98,6 +102,7 @@ verify_tlaps() {
   (
     cd "$tlaps_state"
     tlapm -I "$root/formal/tla" "$root/formal/tla/PrecisionLifecycle.tla"
+    tlapm -I "$root/formal/tla" "$root/formal/tla/ReleaseProtocol.tla"
   ) 2>&1 | tee "$log"
   local status="${PIPESTATUS[0]}"
   set -e
@@ -106,7 +111,7 @@ verify_tlaps() {
     return "$status"
   fi
 
-  grep -q 'All 3 obligations proved\.' "$log"
+  [[ "$(grep -c 'All 3 obligations proved\.' "$log")" == "2" ]]
 }
 
 verify_z3() {

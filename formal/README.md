@@ -14,7 +14,9 @@ countermodels so that one tool is never asked to establish every kind of claim.
 | Rocq | `rocq/Countermodels.v` | Concrete refutations of invalid algebraic identifications |
 | Rocq | `rocq/RustRefinement.v` | Stable identifiers, Rust descriptor mapping, evidence binding, and private composition and validation witnesses |
 | TLA+ and TLC | `tla/PrecisionLifecycle.tla` | Exhaustive validation, composition, publication, rejection, and cancellation lifecycle |
+| TLA+ and TLC | `tla/ReleaseProtocol.tla` | Exhaustive immutable-release policy, protected-tag, validation, asset, draft, and publication ordering |
 | TLAPS | `tla/PrecisionLifecycle.tla` | Transition-local exactness and witness implications used by the lifecycle |
+| TLAPS | `tla/ReleaseProtocol.tla` | Preconditions and terminal-state implications at irreversible release transitions |
 | Z3 | `smt/contracts.smt2` | Independent unsatisfiability checks and satisfiable countermodels |
 
 Every named Rocq result used as evidence ends with `Print Assumptions`. The verification runner
@@ -38,11 +40,11 @@ Evidence is captured under `target/verification/`.
 
 ## Trust statement
 
-Rocq's kernel checks constructive proofs. TLC exhaustively explores the finite lifecycle model but
-does not prove unbounded implementation behavior. TLAPS checks three logical kernels in the TLA+
-module. Z3 validates deliberately separate first-order encodings. The trusted computing base is
-therefore the toolchain, each formalization, and the future refinement argument—not merely a green
-command exit.
+Rocq's kernel checks constructive proofs. TLC exhaustively explores the finite semantic-lifecycle
+and release-protocol models but does not prove unbounded implementation behavior. TLAPS checks six
+logical kernels across the two TLA+ modules. Z3 validates deliberately separate first-order
+encodings. The trusted computing base is therefore the toolchain, each formalization, and the
+future refinement argument—not merely a green command exit.
 
 The production mapping is specified in the
 [Rust refinement argument](../docs/science/rust-refinement.md) and indexed by the

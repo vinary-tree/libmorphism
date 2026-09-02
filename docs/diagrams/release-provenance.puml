@@ -30,6 +30,7 @@ activate Gate
 Gate -> Gate: Rust + minimum version + proofs + docs + package
 Gate --> Maintainer: complete evidence or fail closed
 deactivate Gate
+Maintainer -> GitHub: require immutable-release policy enabled
 Maintainer -> Tag: create exact v{Cargo version} tag
 Maintainer -> CI: dispatch validate-only on exact tag
 activate CI
@@ -40,8 +41,9 @@ deactivate CI
 
 alt Publish GitHub destination
   Maintainer -> CI: dispatch github-release on same tag
-  CI -> GitHub: create only when release is absent
-  GitHub --> Maintainer: read back tag, assets, checksums
+  CI -> GitHub: create draft only when release is absent
+  CI -> GitHub: attach checksummed assets, then publish
+  GitHub --> Maintainer: read back immutable=true, tag, assets, checksums
 else Publish registry destination
   Maintainer -> CI: dispatch crates-io on same tag
   CI -> Registry: publish only when version is absent

@@ -2,15 +2,17 @@
 
 ## Claims under test
 
-The formal development evaluates seven claim families:
+The formal development evaluates eight claim families:
 
 1. endpoint-checked composition is associative and has identities;
 2. declared effects compose associatively with an empty identity;
 3. exactness and completeness never promote through composition;
 4. validation witnesses are constructible exactly when their checks succeed;
 5. semiring homomorphisms preserve natural order, while order reflection requires injectivity; and
-6. indexed families are fibers but need not admit fibration lifts; and
-7. the Rust representation preserves endpoint, evidence, provenance, and witness boundaries.
+6. indexed families are fibers but need not admit fibration lifts;
+7. the Rust representation preserves endpoint, evidence, provenance, and witness boundaries; and
+8. irreversible release publication follows policy, protected-tag, validation, asset, and
+   immutability preconditions.
 
 The evidence matrix separates universal proofs, finite-state exploration, and counterexamples.
 
@@ -23,6 +25,7 @@ The evidence matrix separates universal proofs, finite-state exploration, and co
 | Invalid algebra conflations | Constructive counterexamples | — | — | Satisfiable multiplication/meet countermodel |
 | Fiber versus fibration | Constructive counterexample | — | — | — |
 | Rust representation refinement | Proof plus correspondence tests | — | — | — |
+| Immutable release ordering | — | 9 reachable states | Three logical kernels | — |
 
 ## Formal-first sequence
 
@@ -61,9 +64,10 @@ still refine the same partial semantics.
 
 ## TLA+ interpretation
 
-The TLA+ state consists of a lifecycle phase, two immutable input exactness flags, result
-exactness, witness validity, and publication status. TLC explores all four combinations of input
-flags and all enabled transitions. The checked invariants are:
+The TLA+ evidence uses two deliberately separate state machines. `PrecisionLifecycle.tla` consists
+of a lifecycle phase, two immutable input exactness flags, result exactness, witness validity, and
+publication status. TLC explores all four combinations of input flags and all enabled transitions.
+Its checked invariants are:
 
 - every variable retains its declared finite type;
 - a result cannot be exact unless both inputs are exact;
@@ -75,9 +79,16 @@ TLC currently generates 26 states and finds 25 distinct reachable states at dept
 counts are regression sentinels: an intentional lifecycle extension must update both the model and
 the verification script after review.
 
-TLAPS proves the three propositional kernels connecting exactness and witness conditions. They are
-spelled out rather than hidden behind definition expansion; TLC independently connects them to the
-named actions across the complete finite transition system.
+`ReleaseProtocol.tla` models the deployment boundary separately so package-publishing concerns do
+not contaminate the morphism lifecycle. It permits policy enablement and tag protection in either
+order. Validation requires the protected tag; draft creation additionally requires the immutable
+release policy; publication additionally requires all checksummed assets. The published state is
+terminal. TLC generates 21 states, finds 9 distinct reachable states at depth seven, and establishes
+that neither a draft nor a public release can be reached without its complete preconditions.
+
+TLAPS proves three propositional kernels in each model. They are spelled out rather than hidden
+behind definition expansion; TLC independently connects all six kernels to the named actions across
+both complete finite transition systems.
 
 ## Independent countermodels
 
@@ -94,7 +105,7 @@ improvement: it may mean the encoding accidentally asserted the conclusion.
 ## Threats to validity
 
 - A proved theorem can formalize the wrong requirement. Statement review remains mandatory.
-- The finite TLA+ model omits implementation data sizes, failures, and scheduling timing.
+- The finite TLA+ models omit implementation data sizes, API failures, and scheduling timing.
 - Z3 checks its own encoding, not the Rocq source.
 - Effects are currently conservative booleans; richer regions or capabilities need new laws.
 - Executable correspondence covers the selected finite encodings; verifier-specific proof formats

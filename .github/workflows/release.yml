@@ -175,10 +175,21 @@ jobs:
           prerelease=()
           if [[ "$version" == *-* ]]; then prerelease=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" target/release-dist/* \
+            --draft \
             --verify-tag \
             --title "libmorphism $version" \
             --generate-notes \
             "${prerelease[@]}"
+          gh release edit "$GITHUB_REF_NAME" --draft=false
+          immutable=$(gh api \
+            "repos/$GITHUB_REPOSITORY/releases/tags/$GITHUB_REF_NAME" \
+            --jq '.immutable')
+          if [[ "$immutable" != true ]]; then
+            printf '%s%s\n' \
+              'published GitHub release is not ' \
+              'repository-enforced immutable' >&2
+            exit 1
+          fi
 
   crates-io:
     name: Publish crates.io

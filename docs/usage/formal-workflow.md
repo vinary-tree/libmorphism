@@ -66,7 +66,8 @@ readback.
 
 1. Define the semantic claim and its observable consequences in the relevant theory document.
 2. Add or revise the Rocq theorem without axioms or admissions.
-3. If the claim concerns lifecycle or concurrency, revise the TLA+ behavior and invariants.
+3. If the claim concerns lifecycle, concurrency, or an irreversible release transition, revise the
+   relevant TLA+ behavior and invariants.
 4. Add a negative model for each plausible but rejected strengthening.
 5. Run the focused formal gate while iterating, then run `scripts/verify-formal.sh all`.
 6. Update the implementation and its exhaustive correspondence tests.
